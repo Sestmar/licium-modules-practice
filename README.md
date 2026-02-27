@@ -1,4 +1,4 @@
-# 🧩 Licium Modules — Colección de Módulos de Práctica
+# Licium Modules — Colección de Módulos de Práctica
 
 > Repositorio de módulos personalizados desarrollados para el framework **Licium**: un entorno Dockerizado basado en **Python/FastAPI** (backend), **PostgreSQL** (persistencia) y un frontend **Nuxt** que renderiza interfaces de usuario declaradas en **YAML**.
 
@@ -61,7 +61,7 @@ El backend expone automáticamente endpoints REST a partir de los modelos regist
 
 ---
 
-## 📦 Módulos Incluidos
+## Módulos Incluidos
 
 | Módulo | Nivel | Descripción | Documentación |
 |--------|:-----:|-------------|:-------------:|
