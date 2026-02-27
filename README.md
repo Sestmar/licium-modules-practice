@@ -158,10 +158,6 @@ data:
 
 Si una vista referencia un `ext_id` de un grupo que aún no se ha creado, la instalación fallará. **Respetar siempre la cadena de dependencias**.
 
-### Hot-reload en desarrollo
-
-El backend se ejecuta con `uvicorn --reload`, por lo que cualquier cambio en archivos Python dentro de `app/` o `modules/` se refleja automáticamente sin reiniciar el contenedor.
-
 ---
 
 ## 🗂 Estructura del Repositorio
