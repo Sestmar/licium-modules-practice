@@ -1,0 +1,25 @@
+common:
+  answers:
+    yes: "Sí"
+    no: "No"
+      
+practice_checklist:
+  checklist:
+    $name: "Checklist"
+    $plural: "Checklists"
+    name: "Nombre"
+    status: "Estado"
+    is_public: "Público"
+    owner_id: "Responsable"
+    closed_at: "Cerrado el"
+    description: "Descripción"
+      
+  checklist_item:
+    $name: "Ítem"
+    $plural: "Ítems"
+    title: "Tarea"
+    is_done: "Completado"
+    done_at: "Completado el"
+    checklist_id: "Pertenece a"
+    assigned_user_id: "Asignado a"
+    note: "Notas"

@@ -1,0 +1,153 @@
+- model: ui.view
+  ext_id: practice_checklist_view_checklist_list
+  fields:
+    name: "practice_checklist.checklist - Lista"
+    title:
+      $fallback: "Checklists - Lista"
+    model_key: practice_checklist.checklist
+    type_id.ext_id: ui.ui_view_type_list
+    definition:
+      columns:
+        - { field: id, label: ID, width: 70 }
+        - { field: name, label: Checklist, sortable: true }
+        - { field: status, label: Estado, chip: true }
+        - { field: owner_id, label: Responsable }
+        - { field: is_public, label: Público, width: 90 }
+        - { field: closed_at, label: Cerrado en }
+      actions:
+        - { name: new, type: create, icon: mdi-plus, label: "Nuevo" }
+        - { name: edit, type: update, icon: mdi-pencil, label: "Editar" }
+        - { name: delete, type: delete, icon: mdi-delete, label: "Borrar" }
+      row_actions:
+        - key: close
+          type: service
+          label: "Cerrar"
+          icon: mdi-check
+          method: close
+          model_key: practice_checklist.checklist
+          groups: [practice_checklist_group_manager, core_group_superadmin]
+          confirm:
+            text: "¿Cerrar checklist?"
+        - key: reopen
+          type: service
+          label: "Reabrir"
+          icon: mdi-lock-open-variant-outline
+          method: reopen
+          model_key: practice_checklist.checklist
+          groups: [practice_checklist_group_manager, core_group_superadmin]
+          confirm:
+            text: "¿Reabrir checklist?"
+
+- model: ui.view
+  ext_id: practice_checklist_view_checklist_form
+  fields:
+    name: "practice_checklist.checklist - Formulario"
+    title:
+      $fallback: "Checklist - Formulario"
+    model_key: practice_checklist.checklist
+    type_id.ext_id: ui.ui_view_type_form
+    definition:
+      groups:
+        - label: Básico
+          fields: [name, status, owner_id, is_public]
+        - label: Descripción
+          fields: [description]
+        - label: Auditoría
+          fields: [closed_at]
+      form_actions:
+        - key: close
+          type: service
+          label: "Cerrar"
+          icon: mdi-check
+          method: close
+          groups: [practice_checklist_group_manager, core_group_superadmin]
+          confirm:
+            text: "¿Cerrar checklist?"
+        - key: reopen
+          type: service
+          label: "Reabrir"
+          icon: mdi-lock-open-variant-outline
+          method: reopen
+          groups: [practice_checklist_group_manager, core_group_superadmin]
+          confirm:
+            text: "¿Reabrir checklist?"
+
+- model: ui.view
+  ext_id: practice_checklist_view_item_list
+  fields:
+    name: "practice_checklist.checklist_item - Lista"
+    title:
+      $fallback: "Ítems - Lista"
+    model_key: practice_checklist.checklist_item
+    type_id.ext_id: ui.ui_view_type_list
+    definition:
+      columns:
+        - { field: id, label: ID, width: 70 }
+        - { field: checklist, label: Checklist }
+        - { field: title, label: Ítem, sortable: true }
+        - { field: assigned_user_id, label: Asignado }
+        - { field: is_done, label: Hecho, chip: true }
+        - { field: done_at, label: Hecho en }
+      actions:
+        - { name: new, type: create, icon: mdi-plus, label: "Nuevo" }
+        - { name: edit, type: update, icon: mdi-pencil, label: "Editar" }
+        - { name: delete, type: delete, icon: mdi-delete, label: "Borrar" }
+      bulk_actions:
+        - key: bulk_mark_done
+          type: service
+          label: "Marcar selección como hecha"
+          icon: mdi-check-all
+          method: bulk_set_done
+          model_key: practice_checklist.checklist_item
+          groups: [practice_checklist_group_manager, core_group_superadmin]
+          confirm:
+            text: "¿Estás seguro de marcar estas tareas como hechas?"
+          params:
+            - name: done
+              label: Hecho
+              type: boolean
+              default: true
+      row_actions:
+        - key: mark_done
+          type: service
+          label: "Marcar hecho"
+          icon: mdi-check
+          method: set_done
+          model_key: practice_checklist.checklist_item
+          groups: [practice_checklist_group_manager, core_group_superadmin]
+        - key: mark_pending
+          type: service
+          label: "Marcar pendiente"
+          icon: mdi-undo
+          method: set_done
+          model_key: practice_checklist.checklist_item
+          groups: [practice_checklist_group_manager, core_group_superadmin]
+          params:
+            - name: done
+              label: Hecho
+              type: boolean
+              default: false
+
+- model: ui.view
+  ext_id: practice_checklist_view_item_form
+  fields:
+    name: "practice_checklist.checklist_item - Formulario"
+    title:
+      $fallback: "Ítem - Formulario"
+    model_key: practice_checklist.checklist_item
+    type_id.ext_id: ui.ui_view_type_form
+    definition:
+      groups:
+        - label: Básico
+          fields: [checklist_id, title, assigned_user_id, is_done]
+        - label: Nota
+          fields: [note]
+        - label: Auditoría
+          fields: [done_at]
+      form_actions:
+        - key: set_done
+          type: service
+          label: "Actualizar estado"
+          icon: mdi-check-decagram
+          method: set_done
+          groups: [practice_checklist_group_manager, core_group_superadmin]

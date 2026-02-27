@@ -1,0 +1,55 @@
+# Reglas para el Lector (Puede ver todo)
+- model: core.aclrule
+  ext_id: asset_lending_acl_reader_all
+  fields:
+    group_id.ext_id: asset_lending_group_reader
+    model_key: "asset_lending.*"
+    perm_read: true
+
+# Reglas para el gestor (Puede hacerlo todo)
+- model: core.aclrule
+  ext_id: asset_lending_acl_manager_location
+  fields:
+    group_id.ext_id: asset_lending_group_manager
+    model_key: "asset_lending.location"
+    perm_read: true
+    perm_create: true
+    perm_write: true
+    perm_delete: true
+
+- model: core.aclrule
+  ext_id: asset_lending_acl_manager_asset
+  fields:
+    group_id.ext_id: asset_lending_group_manager
+    model_key: "asset_lending.asset"
+    perm_read: true
+    perm_create: true
+    perm_write: true
+    perm_delete: true
+
+- model: core.aclrule
+  ext_id: asset_lending_acl_manager_loan
+  fields:
+    group_id.ext_id: asset_lending_group_manager
+    model_key: "asset_lending.loan"
+    perm_read: true
+    perm_create: true
+    perm_write: true
+    perm_delete: true
+
+# Reto OPCIONAL: Reglas para el Técnico (Solo puede editar recursos de la Ubicación 1) 
+- model: core.aclrule
+  ext_id: asset_lending_acl_tech_asset_read
+  fields:
+    group_id.ext_id: asset_lending_group_tech
+    model_key: "asset_lending.asset"
+    perm_read: true
+
+- model: core.aclrule
+  ext_id: asset_lending_acl_tech_asset_write
+  fields:
+    group_id.ext_id: asset_lending_group_tech
+    model_key: "asset_lending.asset"
+    perm_write: true
+    domain:
+      - { field: "location_id", operator: "=", value: 1 }

@@ -1,0 +1,91 @@
+# 1. ACCIONES
+- model: ui.action
+  ext_id: asset_lending_action_asset
+  fields:
+    name: "Recursos"
+    route: asset-lending/assets
+    model_key: asset_lending.asset
+    model_path: "asset_lending/asset"
+    menu: true
+    context:
+      allowed_group_ext_ids:
+        - asset_lending_group_reader
+        - asset_lending_group_manager
+        - core_group_superadmin
+    default_multi_read_view_id.ext_id: asset_lending_view_asset_list
+    default_single_edit_view_id.ext_id: asset_lending_view_asset_form
+    views.ext_id:
+      - asset_lending_view_asset_list
+      - asset_lending_view_asset_form
+
+- model: ui.action
+  ext_id: asset_lending_action_loan
+  fields:
+    name: "Préstamos"
+    route: asset-lending/loans
+    model_key: asset_lending.loan
+    model_path: "asset_lending/loan"
+    menu: true
+    context:
+      allowed_group_ext_ids:
+        - asset_lending_group_reader
+        - asset_lending_group_manager
+        - core_group_superadmin
+    default_multi_read_view_id.ext_id: asset_lending_view_loan_list
+    default_single_edit_view_id.ext_id: asset_lending_view_loan_form
+    views.ext_id:
+      - asset_lending_view_loan_list
+      - asset_lending_view_loan_form
+
+- model: ui.action
+  ext_id: asset_lending_action_location
+  fields:
+    name: "Ubicaciones"
+    route: asset-lending/locations
+    model_key: asset_lending.location
+    model_path: "asset_lending/location"
+    menu: true
+    context:
+      allowed_group_ext_ids:
+        - asset_lending_group_reader
+        - asset_lending_group_manager
+        - core_group_superadmin
+    default_multi_read_view_id.ext_id: asset_lending_view_location_list
+    default_single_edit_view_id.ext_id: asset_lending_view_location_form
+    views.ext_id:
+      - asset_lending_view_location_list
+      - asset_lending_view_location_form
+
+# 2. MENÚS VISUALES
+# Menú Padre (Raíz)
+- model: ui.menuitem
+  ext_id: asset_lending_menu_root
+  fields:
+    title: "Assets"   
+    icon: "mdi-laptop"
+    sequence: 50
+
+# Submenús
+- model: ui.menuitem
+  ext_id: asset_lending_menu_asset
+  fields:
+    title: "Recursos"  
+    parent_id.ext_id: asset_lending_menu_root
+    action_id.ext_id: asset_lending_action_asset
+    sequence: 10
+
+- model: ui.menuitem
+  ext_id: asset_lending_menu_loan
+  fields:
+    title: "Préstamos" 
+    parent_id.ext_id: asset_lending_menu_root
+    action_id.ext_id: asset_lending_action_loan
+    sequence: 20
+
+- model: ui.menuitem
+  ext_id: asset_lending_menu_location
+  fields:
+    title: "Ubicaciones" 
+    parent_id.ext_id: asset_lending_menu_root
+    action_id.ext_id: asset_lending_action_location
+    sequence: 30

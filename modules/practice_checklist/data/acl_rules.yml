@@ -1,0 +1,26 @@
+- model: core.aclrule
+  ext_id: practice_checklist_acl_reader_read
+  fields:
+    model_key: "practice_checklist.*"
+    group_id.ext_id: practice_checklist_group_reader
+    perm_read: true
+
+- model: core.aclrule
+  ext_id: practice_checklist_acl_manager_all
+  fields:
+    model_key: "practice_checklist.*"
+    group_id.ext_id: practice_checklist_group_manager
+    perm_read: true
+    perm_write: true
+    perm_create: true
+    perm_delete: true
+
+- model: core.aclrule
+  ext_id: practice_checklist_acl_public_read_closed
+  fields:
+    model_key: "practice_checklist.checklist"
+    group_id.ext_id: core.core_group_public
+    perm_read: true
+    domain:
+      - { field: "is_public", operator: "=", value: true }
+      - { field: "status", operator: "=", value: "closed" }

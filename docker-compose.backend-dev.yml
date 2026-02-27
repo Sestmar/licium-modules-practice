@@ -1,0 +1,90 @@
+version: "2.4"
+
+services:
+  postgres:
+    image: postgres:17-bookworm
+    container_name: licium-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-licium}
+      POSTGRES_USER: ${POSTGRES_USER:-licium}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-licium_dev_password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-licium} -d ${POSTGRES_DB:-licium}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    image: ${BACKEND_IMAGE:-registry.gitlab.com/licium/community/ci-cd/backend:latest}
+    container_name: licium-backend-dev
+    restart: unless-stopped
+    working_dir: /opt/licium
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      HOST: postgres
+      DB_NAME: ${POSTGRES_DB:-licium}
+      USER: ${POSTGRES_USER:-licium}
+      PASSWORD: ${POSTGRES_PASSWORD:-licium_dev_password}
+      FILESTORE_DIR: /opt/licium/filestore
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY:-change-this-dev-secret}
+      LICIUM_FAULTHANDLER_LOG: /opt/licium/filestore/faulthandler.log
+      LICIUM_THEMES_AUTOSYNC: ${LICIUM_THEMES_AUTOSYNC:-1}
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      LICIUM_DB_POOL_SIZE: ${LICIUM_DB_POOL_SIZE:-20}
+      LICIUM_DB_MAX_OVERFLOW: ${LICIUM_DB_MAX_OVERFLOW:-40}
+      LICIUM_DB_POOL_TIMEOUT: ${LICIUM_DB_POOL_TIMEOUT:-10}
+      LICIUM_DB_POOL_RECYCLE: ${LICIUM_DB_POOL_RECYCLE:-1800}
+    command:
+      - sh
+      - -lc
+      - >
+        exec uvicorn main:app
+        --host 0.0.0.0
+        --port 8000
+        --reload
+        --reload-dir /opt/licium/app
+        --reload-dir /opt/licium/modules
+    volumes:
+      # Optional source mounts for local development:
+      # - ${BACKEND_SOURCE_DIR}:/opt/licium
+      - ${MODULES_SOURCE_DIR}:/opt/licium/modules
+      - ${FILESTORE_SOURCE_DIR:-./filestore}:/opt/licium/filestore
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/version', timeout=3)\"",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-registry.gitlab.com/licium/community/ci-cd/frontend:latest}
+    container_name: licium-frontend-dev
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8000/api}
+      NUXT_API_BASE_INTERNAL: ${NUXT_API_BASE_INTERNAL:-http://backend:8000/api}
+      NUXT_PUBLIC_API_AUTH_ENABLED: ${NUXT_PUBLIC_API_AUTH_ENABLED:-1}
+      NUXT_PUBLIC_ACTIVE_MODULES: ${NUXT_PUBLIC_ACTIVE_MODULES:-}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+
+volumes:
+  postgres_data:

@@ -1,0 +1,12 @@
+# Entornos y secretos
+.env
+.env.*
+
+# Carpetas de datos locales (Archivos subidos y BD)
+filestore/
+pgdata/
+
+# Archivos de caché de Python
+__pycache__/
+*.py[cod]
+*$py.class

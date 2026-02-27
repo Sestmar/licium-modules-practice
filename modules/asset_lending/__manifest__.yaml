@@ -1,0 +1,14 @@
+name: Asset Lending
+technical_name: asset_lending
+version: 0.1
+depends:
+  - ui
+  - core
+data:
+  - data/groups.yml
+  - data/acl_rules.yml
+  - data/ui_modules.yml
+  - views/views.yml
+  - views/menu.yml
+migrations: {}
+post_init_hook: null

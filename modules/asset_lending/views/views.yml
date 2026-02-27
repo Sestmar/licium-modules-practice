@@ -1,0 +1,119 @@
+# 1. VISTAS DE UBICACIONES (Location)
+- model: ui.view
+  ext_id: asset_lending_view_location_list
+  fields:
+    name: "Ubicaciones - Lista"
+    model_key: asset_lending.location
+    type_id.ext_id: ui.ui_view_type_list
+    definition:
+      columns:
+        - { field: id, label: ID, width: 70 }
+        - { field: code, label: Código }
+        - { field: name, label: Nombre }
+        - { field: is_active, label: Activo, chip: true }
+      actions:
+        - { name: new, type: create, icon: mdi-plus, label: "Nuevo" }
+        - { name: edit, type: update, icon: mdi-pencil, label: "Editar" }
+        - { name: delete, type: delete, icon: mdi-delete, label: "Borrar" }
+
+- model: ui.view
+  ext_id: asset_lending_view_location_form
+  fields:
+    name: "Ubicaciones - Formulario"
+    model_key: asset_lending.location
+    type_id.ext_id: ui.ui_view_type_form
+    definition:
+      groups:
+        - label: Datos Generales
+          fields: [code, name, is_active]
+
+# 2. VISTAS DE RECURSOS (Asset)
+- model: ui.view
+  ext_id: asset_lending_view_asset_list
+  fields:
+    name: "Recursos - Lista"
+    model_key: asset_lending.asset
+    type_id.ext_id: ui.ui_view_type_list
+    definition:
+      columns:
+        - { field: id, label: ID, width: 70 }
+        - { field: asset_code, label: Código }
+        - { field: name, label: Recurso }
+        - { field: status, label: Estado, chip: true }
+        - { field: location_id, label: Ubicación }
+      actions:
+        - { name: new, type: create, icon: mdi-plus, label: "Nuevo" }
+        - { name: edit, type: update, icon: mdi-pencil, label: "Editar" }
+        - { name: delete, type: delete, icon: mdi-delete, label: "Borrar" }
+      row_actions:
+        - key: send_maintenance
+          type: service
+          label: "A Mantenimiento"
+          icon: mdi-wrench
+          method: mark_maintenance
+          model_key: asset_lending.asset
+          groups: [asset_lending_group_manager, asset_lending_group_tech, core_group_superadmin]
+        - key: release_maintenance
+          type: service
+          label: "Liberar"
+          icon: mdi-check-circle-outline
+          method: release_maintenance
+          model_key: asset_lending.asset
+          groups: [asset_lending_group_manager, asset_lending_group_tech, core_group_superadmin]  
+
+- model: ui.view
+  ext_id: asset_lending_view_asset_form
+  fields:
+    name: "Recursos - Formulario"
+    model_key: asset_lending.asset
+    type_id.ext_id: ui.ui_view_type_form
+    definition:
+      groups:
+        - label: Información Básica
+          fields: [asset_code, name, status]
+        - label: Asignación
+          fields: [location_id, responsible_user_id]
+        - label: Notas
+          fields: [notes]
+
+# 3. VISTAS DE PRÉSTAMOS (Loan)
+- model: ui.view
+  ext_id: asset_lending_view_loan_list
+  fields:
+    name: "Préstamos - Lista"
+    model_key: asset_lending.loan
+    type_id.ext_id: ui.ui_view_type_list
+    definition:
+      columns:
+        - { field: id, label: ID, width: 70 }
+        - { field: asset_id, label: Recurso }
+        - { field: borrower_user_id, label: Prestatario }
+        - { field: status, label: Estado, chip: true }
+        - { field: checkout_at, label: Fecha Salida }
+      actions:
+        - { name: new, type: create, icon: mdi-plus, label: "Nuevo" }
+        - { name: edit, type: update, icon: mdi-pencil, label: "Editar" }
+        - { name: delete, type: delete, icon: mdi-delete, label: "Borrar" }
+      row_actions:
+        - key: return_item
+          type: service
+          label: "Devolver"
+          icon: mdi-keyboard-return
+          method: return_asset
+          model_key: asset_lending.loan
+          groups: [asset_lending_group_manager, core_group_superadmin]  
+
+- model: ui.view
+  ext_id: asset_lending_view_loan_form
+  fields:
+    name: "Préstamos - Formulario"
+    model_key: asset_lending.loan
+    type_id.ext_id: ui.ui_view_type_form
+    definition:
+      groups:
+        - label: Datos del Préstamo
+          fields: [asset_id, borrower_user_id, status]
+        - label: Fechas
+          fields: [checkout_at, due_at, returned_at]
+        - label: Notas
+          fields: [checkout_note, return_note]

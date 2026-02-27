@@ -1,0 +1,7 @@
+- model: ui.uimodule
+  ext_id: asset_lending_ui_module
+  fields:
+    slug: asset-lending
+    name: Gestión de Préstamos
+    description: "Módulo para préstamos de portátiles y cámaras"
+    active: true

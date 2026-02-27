@@ -1,0 +1,18 @@
+- model: core.group
+  ext_id: asset_lending_group_reader
+  fields:
+    slug: asset_lending_reader
+    name: "Asset Lending - Lector"
+
+- model: core.group
+  ext_id: asset_lending_group_manager
+  fields:
+    slug: asset_lending_manager
+    name: "Asset Lending - Gestor"
+
+# Reto opcional del nivel 2
+- model: core.group
+  ext_id: asset_lending_group_tech
+  fields:
+    slug: asset_lending_tech
+    name: "Asset Lending - Técnico"
