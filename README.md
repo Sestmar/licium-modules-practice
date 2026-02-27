@@ -80,7 +80,7 @@ El backend expone automáticamente endpoints REST a partir de los modelos regist
 ### 1. Clonar y levantar el entorno
 
 ```bash
-git clone <url-del-repositorio>
+git clone <https://github.com/Sestmar/licium-modules-practice>
 cd modules_practice
 
 # Levantar los 3 servicios en modo desarrollo
