@@ -73,7 +73,7 @@ El backend expone automáticamente endpoints REST a partir de los modelos regist
 
 ---
 
-## � Módulo 3 — Feedback & Moderación
+## Módulo 3 — Feedback & Moderación
 
 ### Resumen Funcional
 
@@ -108,7 +108,7 @@ reviewed_by_id = field(Uuid, ForeignKey("core_user.id"), ...)
 
 ---
 
-## �🚀 Puesta en Marcha
+## Puesta en Marcha
 
 ### Requisitos previos
 
