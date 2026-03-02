@@ -1,4 +1,4 @@
-# 💬 Feedback Moderation — Módulo Nivel 3
+# Feedback Moderation — Módulo Nivel 3
 
 > **Módulo de moderación comunitaria** que gestiona el ciclo de vida de sugerencias y comentarios ciudadanos, implementa relaciones Many-to-Many, seguridad dinámica con filtrado por dominio y una máquina de estados completa con cobertura de tests unitarios.
 
