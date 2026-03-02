@@ -1,0 +1,9 @@
+- model: ui.uimodule
+  ext_id: ui_module_feedback_moderation
+  fields:
+    slug: feedback-moderation
+    name: "Feedback & Moderation"
+    technical_name: "feedback_moderation"
+    icon: "mdi-message-alert"
+    version: "1.0.0"
+    description: "Gestión comunitaria, sugerencias y moderación de comentarios."

@@ -1,0 +1,55 @@
+# 1. Regla para el Moderador: Poder absoluto con una sola regla
+- model: core.aclrule
+  ext_id: feedback_acl_moderator_all
+  fields:
+    group_id.ext_id: feedback_group_moderator
+    model_key: "feedback_moderation.*"
+    perm_read: true
+    perm_create: true
+    perm_write: true
+    perm_delete: true
+
+# 2. Reglas para el Público (Viewer): Permiso para CREAR sugerencias y comentarios
+- model: core.aclrule
+  ext_id: feedback_acl_viewer_create_suggestion
+  fields:
+    group_id.ext_id: feedback_group_viewer
+    model_key: "feedback_moderation.suggestion"
+    perm_create: true
+
+- model: core.aclrule
+  ext_id: feedback_acl_viewer_create_comment
+  fields:
+    group_id.ext_id: feedback_group_viewer
+    model_key: "feedback_moderation.comment"
+    perm_create: true
+
+# 3. Reglas para el Público (Viewer): Permiso para LEER solo lo publicado
+- model: core.aclrule
+  ext_id: feedback_acl_viewer_read_suggestion
+  fields:
+    group_id.ext_id: feedback_group_viewer
+    model_key: "feedback_moderation.suggestion"
+    perm_read: true
+    domain:
+      - { field: "status", operator: "=", value: "published" }
+      - { field: "is_public", operator: "=", value: true }
+
+# 4. Regla equivalente para que el público lea los comentarios de sugerencias publicadas
+- model: core.aclrule
+  ext_id: feedback_acl_viewer_read_comment
+  fields:
+    group_id.ext_id: feedback_group_viewer
+    model_key: "feedback_moderation.comment"
+    perm_read: true
+    domain:
+      - { field: "status", operator: "=", value: "published" }
+      - { field: "is_public", operator: "=", value: true }
+
+# 5. Regla para el Público (Viewer): Permiso para LEER las etiquetas (Necesario para el desplegable)
+- model: core.aclrule
+  ext_id: feedback_acl_viewer_read_tag
+  fields:
+    group_id.ext_id: feedback_group_viewer
+    model_key: "feedback_moderation.tag"
+    perm_read: true

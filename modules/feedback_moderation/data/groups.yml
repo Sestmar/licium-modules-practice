@@ -1,0 +1,17 @@
+# 1. Grupo Visualizador (Público)
+# Hereda de core_group_public para que usuarios sin iniciar sesión (o usuarios básicos) 
+# puedan interactuar con el módulo según las reglas ACL que definamos luego.
+- model: core.group
+  ext_id: feedback_group_viewer
+  fields:
+    name: "Feedback - Público / Visualizador"
+    parent_id.ext_id: core.core_group_public
+
+# 2. Grupo Moderador
+# Hereda del grupo viewer, por lo que automáticamente tiene permisos de lectura.
+# A este grupo le daremos permisos de CRUD total y acceso a las acciones de servicio.
+- model: core.group
+  ext_id: feedback_group_moderator
+  fields:
+    name: "Feedback - Moderador"
+    parent_id.ext_id: feedback_group_viewer

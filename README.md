@@ -8,7 +8,9 @@
 
 - [Arquitectura de un Módulo](#-arquitectura-de-un-módulo)
 - [Módulos Incluidos](#-módulos-incluidos)
+- [Módulo 3 — Feedback & Moderación](#-módulo-3--feedback--moderación)
 - [Puesta en Marcha](#-puesta-en-marcha)
+- [Cómo Ejecutar los Tests del Sistema](#-cómo-ejecutar-los-tests-del-sistema)
 - [Notas para Desarrolladores](#-notas-para-desarrolladores)
 - [Estructura del Repositorio](#-estructura-del-repositorio)
 
@@ -67,10 +69,46 @@ El backend expone automáticamente endpoints REST a partir de los modelos regist
 |--------|:-----:|-------------|:-------------:|
 | `practice_checklist` | 1 | Gestor de tareas y checklists con acciones de apertura/cierre | [📄 Ver docs](docs/practice_checklist.md) |
 | `asset_lending` | 2 | Sistema de inventario, ubicaciones y préstamos con seguridad avanzada | [📄 Ver docs](docs/asset_lending.md) |
+| `feedback_moderation` | 3 | Moderación de sugerencias y comentarios con seguridad dinámica y M2M | [📄 Ver docs](docs/feedback_moderation.md) |
 
 ---
 
-## 🚀 Puesta en Marcha
+## � Módulo 3 — Feedback & Moderación
+
+### Resumen Funcional
+
+Este módulo gestiona el **ciclo de vida de sugerencias y comentarios ciudadanos**, permitiendo la moderación activa por parte de administradores y la visualización selectiva para el público. Las sugerencias pasan por una máquina de estados (`pending → published / rejected / merged`) y solo el contenido aprobado y marcado como público es visible para usuarios no moderadores.
+
+### Hitos Técnicos Alcanzados
+
+| Hito | Descripción |
+|------|-------------|
+| ✅ **Relaciones Complejas** | Implementación de relaciones Many-to-Many entre `Suggestion` y `Tag` con tabla de asociación y `back_populates` |
+| ✅ **Seguridad Dinámica** | Uso de Domain Rules en ACL para filtrar contenido sensible en tiempo real — solo se muestra lo `published` e `is_public` |
+| ✅ **UI Reactiva** | Configuración de `row_actions` en vistas de lista para ejecutar acciones de servicio (`publish`, `reject`, `merge`) con un solo clic |
+| ✅ **Calidad de Código** | Cobertura de tests unitarios para las transiciones de estado críticas (`pending → published / rejected`) |
+| ✅ **Formularios Autogenerados** | Diálogos modales generados automáticamente a partir del tipado Python (`str \| None`, `bool`, `int`) |
+
+### ⚠️ Lección Nivel 3: Tipado UUID en Foreign Keys
+
+> Al relacionar tablas con `core_user` en Licium, las FK **deben ser de tipo `Uuid`**, no `Integer`. El campo `core_user.id` es UUID nativo de PostgreSQL.
+
+| Configuración | Tipo FK | Resultado |
+|:---|:---:|:---|
+| ❌ Incorrecta | `Integer` | `DatatypeMismatch` — PostgreSQL rechaza la constraint |
+| ✅ Correcta | `Uuid` | Constraint creada correctamente, persistencia funcional |
+
+```python
+# ❌ Provoca DatatypeMismatch
+reviewed_by_id = field(Integer, ForeignKey("core_user.id"), ...)
+
+# ✅ Correcto: core_user.id es UUID
+reviewed_by_id = field(Uuid, ForeignKey("core_user.id"), ...)
+```
+
+---
+
+## �🚀 Puesta en Marcha
 
 ### Requisitos previos
 
@@ -117,6 +155,10 @@ docker exec -it licium-backend-dev \
 # Instalar el módulo Asset Lending
 docker exec -it licium-backend-dev \
   python -m app.cli.module install modules/asset_lending -y
+
+# Instalar el módulo Feedback Moderation
+docker exec -it licium-backend-dev \
+  python -m app.cli.module install modules/feedback_moderation -y
 ```
 
 ### 4. Acceder al frontend
@@ -126,6 +168,30 @@ http://localhost:3000
 ```
 
 Iniciar sesión con las credenciales de administrador creadas durante la instalación.
+
+---
+
+## 🧪 Cómo Ejecutar los Tests del Sistema
+
+Los módulos incluyen tests unitarios que validan la lógica de negocio. Para ejecutarlos dentro del contenedor Docker:
+
+```bash
+# Tests del módulo Feedback Moderation
+docker exec -it licium-backend-dev python -m pytest modules/feedback_moderation/tests/ -v
+```
+
+Salida esperada:
+
+```
+tests/test_suggestion_states.py::test_publish_suggestion_success             PASSED
+tests/test_suggestion_states.py::test_publish_already_published_raises_error  PASSED
+tests/test_suggestion_states.py::test_reject_suggestion                      PASSED
+tests/test_suggestion_states.py::test_merge_suggestion_with_itself_raises_error  PASSED
+
+========================= 4 passed =========================
+```
+
+> **Nota**: Los tests utilizan `unittest.mock.MagicMock` para simular la sesión de base de datos, por lo que no requieren una instancia de PostgreSQL activa.
 
 ---
 
@@ -169,10 +235,12 @@ modules_practice/
 ├── filestore/                          # Archivos subidos y logs del framework
 ├── modules/
 │   ├── practice_checklist/             # 📋 Módulo Nivel 1
-│   └── asset_lending/                  # 🏢 Módulo Nivel 2
+│   ├── asset_lending/                  # 🏢 Módulo Nivel 2
+│   └── feedback_moderation/            # 💬 Módulo Nivel 3
 ├── docs/
 │   ├── practice_checklist.md           # Documentación del Módulo 1
-│   └── asset_lending.md               # Documentación del Módulo 2
+│   ├── asset_lending.md               # Documentación del Módulo 2
+│   └── feedback_moderation.md         # Documentación del Módulo 3
 └── README.md                           # ← Este archivo
 ```
 

@@ -1,0 +1,55 @@
+# ACCIONES (Rutas invisibles que cargan las vistas)
+
+- model: ui.action
+  ext_id: feedback_action_suggestions
+  fields:
+    route: feedback/suggestions
+    model_key: feedback_moderation.suggestion
+    default_multi_read_view_id.ext_id: feedback_view_suggestion_list
+    default_single_edit_view_id.ext_id: feedback_view_suggestion_form
+
+- model: ui.action
+  ext_id: feedback_action_comments
+  fields:
+    route: feedback/comments
+    model_key: feedback_moderation.comment
+    default_multi_read_view_id.ext_id: feedback_view_comment_list
+    default_single_edit_view_id.ext_id: feedback_view_comment_form
+
+- model: ui.action
+  ext_id: feedback_action_tags
+  fields:
+    route: feedback/tags
+    model_key: feedback_moderation.tag
+    default_multi_read_view_id.ext_id: feedback_view_tag_list
+    default_single_edit_view_id.ext_id: feedback_view_tag_form
+
+# MENÚS
+# Menú Raíz (Carpeta principal)
+- model: ui.menuitem
+  ext_id: feedback_menu_root
+  fields:
+    title: "Feedback & Moderación"
+    icon: mdi-message-alert
+
+# Submenús
+- model: ui.menuitem
+  ext_id: feedback_menu_suggestions
+  fields:
+    title: "Sugerencias"
+    parent_id.ext_id: feedback_menu_root
+    action_id.ext_id: feedback_action_suggestions
+
+- model: ui.menuitem
+  ext_id: feedback_menu_comments
+  fields:
+    title: "Comentarios"
+    parent_id.ext_id: feedback_menu_root
+    action_id.ext_id: feedback_action_comments
+
+- model: ui.menuitem
+  ext_id: feedback_menu_tags
+  fields:
+    title: "Etiquetas"
+    parent_id.ext_id: feedback_menu_root
+    action_id.ext_id: feedback_action_tags

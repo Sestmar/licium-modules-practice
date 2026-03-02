@@ -1,0 +1,172 @@
+# VISTAS PARA SUGGESTION
+# 1. Vista de Lista
+- model: ui.view
+  ext_id: feedback_view_suggestion_list
+  fields:
+    model_key: feedback_moderation.suggestion
+    type_id.ext_id: ui.ui_view_type_list
+    definition:
+      columns:
+        - { field: id, label: ID, width: 70 }
+        - { field: title, label: Título, sortable: true }
+        - { field: status, label: Estado, chip: true }
+        - { field: author_email, label: Email Autor }
+        - { field: is_public, label: Público }
+      row_actions:
+        - key: action_publish
+          type: service
+          label: "Publicar"
+          icon: mdi-check-circle
+          method: publish
+          model_key: feedback_moderation.suggestion
+          groups: [feedback_group_moderator, core_group_superadmin]
+          
+        - key: action_reject
+          type: service
+          label: "Rechazar"
+          icon: mdi-close-circle
+          method: reject
+          model_key: feedback_moderation.suggestion
+          groups: [feedback_group_moderator, core_group_superadmin]
+
+        - key: action_merge
+          type: service
+          label: "Fusionar"
+          icon: mdi-source-merge
+          method: merge
+          model_key: feedback_moderation.suggestion
+          groups: [feedback_group_moderator, core_group_superadmin]
+
+# 2. Vista de Formulario
+- model: ui.view
+  ext_id: feedback_view_suggestion_form
+  fields:
+    model_key: feedback_moderation.suggestion
+    type_id.ext_id: ui.ui_view_type_form
+    definition:
+      groups:
+        - label: Principal
+          fields: [title, status, is_public, tags]
+        - label: Detalles
+          fields: [content, author_name, author_email]
+        - label: Moderación y Auditoría
+          fields: [moderation_note, reviewed_by_id, published_at]
+      
+      # Aquí es donde exponemos las acciones del SuggestionService como botones
+      header_actions:
+        - key: action_publish
+          type: service
+          label: "Publicar"
+          icon: mdi-check-circle
+          method: publish
+          model_key: feedback_moderation.suggestion
+          groups: [feedback_group_moderator, core_group_superadmin]
+          
+        - key: action_reject
+          type: service
+          label: "Rechazar"
+          icon: mdi-close-circle
+          method: reject
+          model_key: feedback_moderation.suggestion
+          groups: [feedback_group_moderator, core_group_superadmin]
+
+        - key: action_merge
+          type: service
+          label: "Fusionar"
+          icon: mdi-source-merge
+          method: merge
+          model_key: feedback_moderation.suggestion
+          groups: [feedback_group_moderator, core_group_superadmin]
+          
+        - key: action_reopen
+          type: service
+          label: "Reabrir"
+          icon: mdi-refresh
+          method: reopen
+          model_key: feedback_moderation.suggestion
+          groups: [feedback_group_moderator, core_group_superadmin]
+
+# VISTAS PARA COMMENT
+- model: ui.view
+  ext_id: feedback_view_comment_list
+  fields:
+    model_key: feedback_moderation.comment
+    type_id.ext_id: ui.ui_view_type_list
+    definition:
+      columns:
+        - { field: id, label: ID, width: 70 }
+        - { field: suggestion_id, label: Sugerencia ID }
+        - { field: content, label: Contenido }
+        - { field: status, label: Estado, chip: true }
+        - { field: is_public, label: Público }
+      row_actions:
+        - key: action_publish_comment
+          type: service
+          label: "Publicar"
+          icon: mdi-check-circle
+          method: publish_comment
+          model_key: feedback_moderation.comment
+          groups: [feedback_group_moderator, core_group_superadmin]
+          
+        - key: action_reject_comment
+          type: service
+          label: "Rechazar"
+          icon: mdi-close-circle
+          method: reject_comment
+          model_key: feedback_moderation.comment
+          groups: [feedback_group_moderator, core_group_superadmin]  
+
+- model: ui.view
+  ext_id: feedback_view_comment_form
+  fields:
+    model_key: feedback_moderation.comment
+    type_id.ext_id: ui.ui_view_type_form
+    definition:
+      groups:
+        - label: Principal
+          fields: [suggestion_id, status, is_public]
+        - label: Contenido
+          fields: [content, author_email]
+        - label: Auditoría
+          fields: [published_at]
+      
+      # Botones de acción vinculados al CommentService
+      actions:
+        - key: action_publish_comment
+          type: service
+          label: "Publicar"
+          icon: mdi-check-circle
+          method: publish_comment
+          model_key: feedback_moderation.comment
+          groups: [feedback_group_moderator, core_group_superadmin]
+          
+        - key: action_reject_comment
+          type: service
+          label: "Rechazar"
+          icon: mdi-close-circle
+          method: reject_comment
+          model_key: feedback_moderation.comment
+          groups: [feedback_group_moderator, core_group_superadmin]
+
+# VISTAS PARA TAG
+- model: ui.view
+  ext_id: feedback_view_tag_list
+  fields:
+    model_key: feedback_moderation.tag
+    type_id.ext_id: ui.ui_view_type_list
+    definition:
+      columns:
+        - { field: id, label: ID, width: 70 }
+        - { field: name, label: Nombre, sortable: true }
+        - { field: slug, label: Slug }
+        - { field: color, label: Color, chip: true }
+
+- model: ui.view
+  ext_id: feedback_view_tag_form
+  fields:
+    model_key: feedback_moderation.tag
+    type_id.ext_id: ui.ui_view_type_form
+    definition:
+      groups:
+        - label: Configuración
+          fields: [name, slug, color]
