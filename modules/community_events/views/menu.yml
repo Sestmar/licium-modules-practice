@@ -1,0 +1,35 @@
+ui.menuitem:
+  # 1. Menú Raíz
+  - ext_id: menu_community_events_root
+    label:
+      es: Eventos
+      en: Events
+    icon: mdi-calendar-star
+    sequence: 40
+
+  # 2. Submenú Eventos
+  - ext_id: menu_community_events_event
+    label:
+      es: Gestión de Eventos
+      en: Events Management
+    parent_ext_id: menu_community_events_root
+    action_ext_id: action_community_events_event
+    sequence: 10
+
+  # 3. Submenú Sesiones
+  - ext_id: menu_community_events_session
+    label:
+      es: Sesiones
+      en: Sessions
+    parent_ext_id: menu_community_events_root
+    action_ext_id: action_community_events_session
+    sequence: 20
+
+  # 4. Submenú Inscripciones
+  - ext_id: menu_community_events_registration
+    label:
+      es: Inscripciones
+      en: Registrations
+    parent_ext_id: menu_community_events_root
+    action_ext_id: action_community_events_registration
+    sequence: 30

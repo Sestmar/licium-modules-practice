@@ -1,0 +1,14 @@
+name: "Community Events"
+technical_name: "community_events"
+version: "1.0.0"
+category: "Community"
+summary: "Gestión de eventos, sesiones internas e inscripciones de la comunidad."
+depends:
+  - core
+  - ui
+data:
+  - data/settings.yml
+  - data/groups.yml
+  - data/acl_rules.yml
+  - views/views.yml
+  - views/menu.yml
