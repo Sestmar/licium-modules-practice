@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sqlalchemy import String, Text, DateTime, ForeignKey, Uuid
+from sqlalchemy import String, Text, DateTime, ForeignKey, Uuid, Integer
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from app.core.base import Base
@@ -12,14 +12,14 @@ class Registration(Base):
     __service__ = "modules.community_events.services.registration.RegistrationService"
 
     event_id = field(
-        Uuid,
+        Integer,
         ForeignKey("community_event.id", ondelete="CASCADE"),
         required=True,
         public=True,
         info={"label": {"es": "Evento", "en": "Event"}}
     )
     session_id = field(
-        Uuid,
+        Integer,
         ForeignKey("community_event_session.id", ondelete="SET NULL"),
         required=False,
         public=True,

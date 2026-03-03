@@ -1,5 +1,4 @@
 from app.core.base import BaseService, exposed_action
-from app.core.exceptions import UserError
 
 class EventService(BaseService):
     __model__ = "community_events.event"
@@ -12,7 +11,7 @@ class EventService(BaseService):
         """Cambia el evento de borrador a publicado."""
         event = self.read(id)
         if event.status != "draft":
-            raise UserError("Solo se pueden publicar eventos que estén en estado borrador.")
+            raise ValueError("Solo se pueden publicar eventos que estén en estado borrador.")
         
         self.update(id, {"status": "published"})
         # Si tuviéramos un sistema de logs, aquí guardaríamos la 'note'
@@ -26,7 +25,7 @@ class EventService(BaseService):
         """Cierra el evento para que no entren más inscripciones."""
         event = self.read(id)
         if event.status != "published":
-            raise UserError("Solo se pueden cerrar eventos que actualmente estén publicados.")
+            raise ValueError("Solo se pueden cerrar eventos que actualmente estén publicados.")
         
         self.update(id, {"status": "closed"})
 
@@ -40,7 +39,7 @@ class EventService(BaseService):
         """Cancela el evento por fuerza mayor."""
         event = self.read(id)
         if event.status == "cancelled":
-            raise UserError("El evento ya está cancelado.")
+            raise ValueError("El evento ya está cancelado.")
         
         self.update(id, {"status": "cancelled"})
 
@@ -52,6 +51,6 @@ class EventService(BaseService):
         """Vuelve a abrir un evento cerrado o cancelado."""
         event = self.read(id)
         if event.status not in ["closed", "cancelled"]:
-            raise UserError("Solo se pueden reabrir eventos que estén cerrados o cancelados.")
+            raise ValueError("Solo se pueden reabrir eventos que estén cerrados o cancelados.")
         
         self.update(id, {"status": "published"})

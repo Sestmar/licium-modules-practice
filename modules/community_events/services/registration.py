@@ -1,5 +1,4 @@
 from app.core.base import BaseService, exposed_action
-from app.core.exceptions import UserError
 from datetime import datetime, timezone
 
 class RegistrationService(BaseService):
@@ -16,7 +15,7 @@ class RegistrationService(BaseService):
         event = event_service.read(event_id)
         
         if event.status != "published":
-            raise UserError("No se admiten inscripciones. El evento no está publicado.")
+            raise ValueError("No se admiten inscripciones. El evento no está publicado.")
             
         # 2. Contamos cuántos confirmados hay ya en este evento
         domain = [("event_id", "=", event_id), ("status", "=", "confirmed")]
@@ -45,7 +44,7 @@ class RegistrationService(BaseService):
     def confirm(self, id: str, note: str | None = None) -> None:
         reg = self.read(id)
         if reg.status == "cancelled":
-            raise UserError("No se puede confirmar una inscripción cancelada.")
+            raise ValueError("No se puede confirmar una inscripción cancelada.")
         self.update(id, {"status": "confirmed", "notes": note})
 
     @exposed_action({
@@ -64,13 +63,13 @@ class RegistrationService(BaseService):
     def checkin(self, id: str, source: str = "manual") -> None:
         reg = self.read(id)
         if reg.status != "confirmed":
-            raise UserError("Solo los asistentes confirmados pueden hacer check-in.")
+            raise ValueError("Solo los asistentes confirmados pueden hacer check-in.")
         if reg.checkin_at:
-            raise UserError("Este asistente ya ha entrado al evento.")
+            raise ValueError("Este asistente ya ha entrado al evento.")
         
         self.update(id, {"checkin_at": datetime.now(timezone.utc)})
 
-    # ¡ATENCIÓN A ESTO! bulk=True permite seleccionar varios en la tabla de golpe
+    # Importante --> bulk=True permite seleccionar varios en la tabla de golpe
     @exposed_action({
         "label": {"es": "Check-in Masivo", "en": "Bulk Check-in"}, 
         "icon": "mdi-account-group", 

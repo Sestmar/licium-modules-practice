@@ -11,7 +11,7 @@ class EventSession(Base):
     __service__ = "modules.community_events.services.session.SessionService"
 
     event_id = field(
-        Uuid,
+        Integer,
         ForeignKey("community_event.id", ondelete="CASCADE"),
         required=True,
         public=True,
@@ -68,4 +68,4 @@ class EventSession(Base):
 
     # Relaciones
     event = relationship("Event", back_populates="sessions")
-    # registrations = relationship("Registration", back_populates="session", cascade="all, delete-orphan")
+    registrations = relationship("Registration", back_populates="session", cascade="all, delete-orphan")
