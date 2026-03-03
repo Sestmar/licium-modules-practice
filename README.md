@@ -9,6 +9,7 @@
 - [Arquitectura de un Módulo](#-arquitectura-de-un-módulo)
 - [Módulos Incluidos](#-módulos-incluidos)
 - [Módulo 3 — Feedback & Moderación](#-módulo-3--feedback--moderación)
+- [Módulo 4 — Community Events](#-módulo-4--community-events)
 - [Puesta en Marcha](#-puesta-en-marcha)
 - [Cómo Ejecutar los Tests del Sistema](#-cómo-ejecutar-los-tests-del-sistema)
 - [Notas para Desarrolladores](#-notas-para-desarrolladores)
@@ -70,6 +71,7 @@ El backend expone automáticamente endpoints REST a partir de los modelos regist
 | `practice_checklist` | 1 | Gestor de tareas y checklists con acciones de apertura/cierre | [📄 Ver docs](docs/practice_checklist.md) |
 | `asset_lending` | 2 | Sistema de inventario, ubicaciones y préstamos con seguridad avanzada | [📄 Ver docs](docs/asset_lending.md) |
 | `feedback_moderation` | 3 | Moderación de sugerencias y comentarios con seguridad dinámica y M2M | [📄 Ver docs](docs/feedback_moderation.md) |
+| `community_events` | 4 | Gestión de eventos comunitarios con aforo automático, waitlist y check-in | [📄 Ver docs](doc/community_events.md) |
 
 ---
 
@@ -105,6 +107,35 @@ reviewed_by_id = field(Integer, ForeignKey("core_user.id"), ...)
 # ✅ Correcto: core_user.id es UUID
 reviewed_by_id = field(Uuid, ForeignKey("core_user.id"), ...)
 ```
+
+---
+
+## 📅 Módulo 4 — Community Events
+
+### Resumen Funcional
+
+Este módulo gestiona el **ciclo de vida completo de eventos comunitarios**, desde la creación y publicación hasta la inscripción de asistentes con control automático de aforo. Incluye sesiones internas por evento (talleres, ponencias), un sistema de **listas de espera** cuando se agota el aforo, y funcionalidad de **check-in** con marca temporal para el día del evento.
+
+### Hitos Técnicos Alcanzados
+
+| Hito | Descripción |
+|------|-------------|
+| ✅ **Gestión de Aforo Automática** | Al crear una inscripción, el sistema cuenta los confirmados y decide automáticamente si confirmar o enviar a waitlist |
+| ✅ **Listas de Espera (Waitlist)** | Las inscripciones que exceden el `capacity_total` pasan a estado `waitlist`, con posibilidad de confirmación manual por staff |
+| ✅ **Validación de Estados de Publicación** | Solo eventos con `status='published'` admiten inscripciones; `draft`, `closed` o `cancelled` devuelven Error 400 |
+| ✅ **Check-in Individual y Masivo** | Acciones `checkin` y `bulk_checkin` con timestamp UTC para control de asistencia |
+| ✅ **Sesiones por Evento** | Relación One-to-Many con `EventSession` para organizar actividades internas |
+| ✅ **Seguridad ACL** | Staff con wildcard `community_events.*`, público con domain `status='published' AND is_public=true` |
+| ✅ **Tests Unitarios Aislados** | Cobertura de la lógica de aforo y validación de estados usando `MagicMock` sin DB real |
+
+### ⚠️ Lección Nivel 4: FK propias vs FK a `core_user`
+
+> Las Foreign Keys que apuntan a modelos **propios** del módulo (`Event`, `EventSession`) deben ser de tipo `Integer` (SERIAL). Las FK que apuntan a `core_user` deben ser obligatoriamente `Uuid`.
+
+| FK destino | Tipo correcto | Ejemplo |
+|:---|:---:|:---|
+| Modelo propio (`community_event.id`) | `Integer` | `event_id = field(Integer, ForeignKey("community_event.id"), ...)` |
+| `core_user.id` | `Uuid` | `organizer_user_id = field(Uuid, ForeignKey("core_user.id"), ...)` |
 
 ---
 
@@ -159,6 +190,10 @@ docker exec -it licium-backend-dev \
 # Instalar el módulo Feedback Moderation
 docker exec -it licium-backend-dev \
   python -m app.cli.module install modules/feedback_moderation -y
+
+# Instalar el módulo Community Events
+docker exec -it licium-backend-dev \
+  python -m app.cli.module install modules/community_events -y
 ```
 
 ### 4. Acceder al frontend
@@ -178,9 +213,14 @@ Los módulos incluyen tests unitarios que validan la lógica de negocio. Para ej
 ```bash
 # Tests del módulo Feedback Moderation
 docker exec -it licium-backend-dev python -m pytest modules/feedback_moderation/tests/ -v
+
+# Tests del módulo Community Events (requiere PYTHONPATH)
+docker compose -f docker-compose.backend-dev.yml exec \
+  -e PYTHONPATH=/opt/licium backend \
+  pytest modules/community_events/tests/test_registration_service.py -v
 ```
 
-Salida esperada:
+Salida esperada (Feedback Moderation):
 
 ```
 tests/test_suggestion_states.py::test_publish_suggestion_success             PASSED
@@ -189,6 +229,15 @@ tests/test_suggestion_states.py::test_reject_suggestion                      PAS
 tests/test_suggestion_states.py::test_merge_suggestion_with_itself_raises_error  PASSED
 
 ========================= 4 passed =========================
+```
+
+Salida esperada (Community Events):
+
+```
+test_registration_service.py::test_registration_closed_event_raises_error     PASSED
+test_registration_service.py::test_registration_waitlist_logic                PASSED
+
+========================= 2 passed =========================
 ```
 
 > **Nota**: Los tests utilizan `unittest.mock.MagicMock` para simular la sesión de base de datos, por lo que no requieren una instancia de PostgreSQL activa.
@@ -236,11 +285,13 @@ modules_practice/
 ├── modules/
 │   ├── practice_checklist/             # 📋 Módulo Nivel 1
 │   ├── asset_lending/                  # 🏢 Módulo Nivel 2
-│   └── feedback_moderation/            # 💬 Módulo Nivel 3
-├── docs/
+│   ├── feedback_moderation/            # 💬 Módulo Nivel 3
+│   └── community_events/              # 📅 Módulo Nivel 4
+├── doc/
 │   ├── practice_checklist.md           # Documentación del Módulo 1
 │   ├── asset_lending.md               # Documentación del Módulo 2
-│   └── feedback_moderation.md         # Documentación del Módulo 3
+│   ├── feedback_moderation.md         # Documentación del Módulo 3
+│   └── community_events.md           # Documentación del Módulo 4
 └── README.md                           # ← Este archivo
 ```
 
