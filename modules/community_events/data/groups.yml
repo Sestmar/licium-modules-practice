@@ -1,0 +1,6 @@
+core.group:
+  - ext_id: community_events_group_staff
+    name: Eventos - Staff (Control Total)
+    
+  - ext_id: community_events_group_viewer
+    name: Eventos - Visualizador (Público)
