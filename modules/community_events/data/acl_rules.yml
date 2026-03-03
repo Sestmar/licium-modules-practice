@@ -1,57 +1,17 @@
-core.acl_rule:
-  # ==========================================
-  # STAFF: Control Total (CRUD)
-  # ==========================================
-  - ext_id: acl_events_staff_event
+- model: core.acl
+  ext_id: acl_events_staff_event
+  fields:
     model_name: community_events.event
-    group_ext_id: community_events_group_staff
+    group_id.ext_id: community_events_group_staff
     perm_read: true
     perm_create: true
     perm_update: true
     perm_delete: true
 
-  - ext_id: acl_events_staff_session
-    model_name: community_events.session
-    group_ext_id: community_events_group_staff
-    perm_read: true
-    perm_create: true
-    perm_update: true
-    perm_delete: true
-
-  - ext_id: acl_events_staff_registration
-    model_name: community_events.registration
-    group_ext_id: community_events_group_staff
-    perm_read: true
-    perm_create: true
-    perm_update: true
-    perm_delete: true
-
-  # ==========================================
-  # PÚBLICO / VIEWER: Acceso Restringido y Seguro
-  # ==========================================
-  # 1. Solo pueden ver eventos publicados y públicos
-  - ext_id: acl_events_viewer_event
+- model: core.acl
+  ext_id: acl_events_viewer_event
+  fields:
     model_name: community_events.event
-    group_ext_id: community_events_group_viewer
+    group_id.ext_id: community_events_group_viewer
     perm_read: true
     domain: "[('status', '=', 'published'), ('is_public', '=', True)]"
-
-  # 2. Solo pueden ver sesiones si el evento padre está publicado
-  - ext_id: acl_events_viewer_session
-    model_name: community_events.session
-    group_ext_id: community_events_group_viewer
-    perm_read: true
-    domain: "[('event.status', '=', 'published')]"
-
-  # 3. Pueden CREAR una inscripción (registrarse)
-  - ext_id: acl_events_viewer_registration_create
-    model_name: community_events.registration
-    group_ext_id: community_events_group_viewer
-    perm_create: true
-
-  # 4. Solo pueden LEER su propia inscripción (Identidad)
-  - ext_id: acl_events_viewer_registration_read
-    model_name: community_events.registration
-    group_ext_id: community_events_group_viewer
-    perm_read: true
-    domain: "[('attendee_user_id', '=', user.id)]"

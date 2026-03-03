@@ -1,20 +1,20 @@
-core.setting:
-  - ext_id: setting_events_allow_waitlist
+- model: core.setting
+  ext_id: setting_events_allow_waitlist
+  fields:
     key: community_events.allow_waitlist
     value: "true"
-    type: bool
+    value_type: bool
 
-  - ext_id: setting_events_default_capacity
+- model: core.setting
+  ext_id: setting_events_default_capacity
+  fields:
     key: community_events.default_capacity
     value: "50"
-    type: int
+    value_type: int
 
-  - ext_id: setting_events_auto_confirm
+- model: core.setting
+  ext_id: setting_events_auto_confirm
+  fields:
     key: community_events.auto_confirm
     value: "false"
-    type: bool
-
-  - ext_id: setting_events_reminder_hours
-    key: community_events.reminder_hours_before
-    value: "24"
-    type: int
+    value_type: bool

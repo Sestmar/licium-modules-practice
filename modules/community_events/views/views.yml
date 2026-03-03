@@ -1,82 +1,86 @@
-ui.action:
-  # Acciones que enlazan los menús con los modelos
-  - ext_id: action_community_events_event
+# ================== ACCIONES ==================
+- model: ui.action
+  ext_id: action_community_events_event
+  fields:
     name: Eventos
-    model_name: community_events.event
-    view_mode: list,form
+    model_key: community_events.event
 
-  - ext_id: action_community_events_session
+- model: ui.action
+  ext_id: action_community_events_session
+  fields:
     name: Sesiones
-    model_name: community_events.session
-    view_mode: list,form
+    model_key: community_events.session
 
-  - ext_id: action_community_events_registration
+- model: ui.action
+  ext_id: action_community_events_registration
+  fields:
     name: Inscripciones
-    model_name: community_events.registration
-    view_mode: list,form
+    model_key: community_events.registration
 
-ui.view:
-  # ==========================================
-  # VISTA FORMULARIO: EVENTO (Con ButtonBox y Flujo de Estados)
-  # ==========================================
-  - ext_id: view_event_form
-    model_name: community_events.event
-    type: form
-    arch: |
-      <form>
-        <header>
-          <button name="publish_event" type="action" state="draft" color="primary"/>
-          <button name="close_registration" type="action" state="published" color="warning"/>
-          <button name="cancel_event" type="action" state="published,closed" color="error"/>
-          <button name="reopen_event" type="action" state="closed,cancelled" color="info"/>
-          <field name="status" widget="statusbar"/>
-        </header>
-        <sheet>
-          <div class="buttonbox">
-            <button type="action" icon="mdi-account-group" name="action_community_events_registration">
-              <field name="capacity_total" widget="statinfo" string="Aforo Total"/>
-            </button>
-          </div>
-          <group>
-            <group>
-              <field name="title"/>
-              <field name="slug"/>
-              <field name="organizer_user_id"/>
-              <field name="is_public"/>
-            </group>
-            <group>
-              <field name="start_at"/>
-              <field name="end_at"/>
-              <field name="capacity_total"/>
-              <field name="location"/>
-            </group>
-          </group>
-          <notebook>
-            <page string="Descripción">
-              <field name="summary"/>
-              <field name="description"/>
-            </page>
-          </notebook>
-        </sheet>
-      </form>
+# ================== VISTAS EVENTO ==================
+- model: ui.view
+  ext_id: events_view_event_list
+  fields:
+    model_key: community_events.event
+    type_id.ext_id: ui.ui_view_type_list
+    definition:
+      columns:
+        - { field: title, label: Título }
+        - { field: status, label: Estado, chip: true }
+        - { field: start_at, label: Inicio }
+        - { field: capacity_total, label: Aforo }
 
-  # ==========================================
-  # VISTA LISTA: INSCRIPCIONES (Con Bulk Action y Row Actions)
-  # ==========================================
-  - ext_id: view_registration_list
-    model_name: community_events.registration
-    type: list
-    arch: |
-      <list>
-        <header>
-          <button name="bulk_checkin" type="action" color="primary"/>
-        </header>
-        <field name="event_id"/>
-        <field name="attendee_name"/>
-        <field name="attendee_email"/>
-        <field name="status" widget="badge"/>
-        <field name="checkin_at"/>
-        <button name="confirm" type="action" icon="mdi-check-circle" title="Confirmar"/>
-        <button name="move_waitlist" type="action" icon="mdi-clock-outline" title="A Lista Espera"/>
-        <button name="checkin" type="action" icon="mdi-map-marker-check" title="Check-in"/>
-      </list>
+- model: ui.view
+  ext_id: events_view_event_form
+  fields:
+    model_key: community_events.event
+    type_id.ext_id: ui.ui_view_type_form
+    definition:
+      groups:
+        - label: Principal
+          fields: [title, slug, status, is_public]
+        - label: Detalles y Aforo
+          fields: [start_at, end_at, capacity_total, location]
+        - label: Información Adicional
+          fields: [summary, description, organizer_user_id]
+      
+      header_actions:
+        - key: action_publish_event
+          type: service
+          label: "Publicar"
+          icon: mdi-earth
+          method: publish_event
+          model_key: community_events.event
+        - key: action_close_reg
+          type: service
+          label: "Cerrar Inscripciones"
+          icon: mdi-door-closed
+          method: close_registration
+          model_key: community_events.event
+
+# ================== VISTAS INSCRIPCIÓN ==================
+- model: ui.view
+  ext_id: events_view_registration_list
+  fields:
+    model_key: community_events.registration
+    type_id.ext_id: ui.ui_view_type_list
+    definition:
+      columns:
+        - { field: attendee_name, label: Asistente }
+        - { field: attendee_email, label: Email }
+        - { field: status, label: Estado, chip: true }
+        - { field: checkin_at, label: Entrada }
+      
+      row_actions:
+        - key: action_confirm_reg
+          type: service
+          label: "Confirmar"
+          icon: mdi-check-circle
+          method: confirm
+          model_key: community_events.registration
+        - key: action_checkin_reg
+          type: service
+          label: "Hacer Check-in"
+          icon: mdi-map-marker-check
+          method: checkin
+          model_key: community_events.registration
