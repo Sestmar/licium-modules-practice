@@ -1,0 +1,9 @@
+- model: ui.uimodule
+  ext_id: ui_module_community_events
+  fields:
+    slug: community-events
+    name: "Eventos"
+    technical_name: "community_events"
+    icon: "mdi-calendar-star"
+    version: "1.0.0"
+    description: "Gestión de eventos, sesiones e inscripciones de la comunidad."

@@ -7,6 +7,7 @@ depends:
   - core
   - ui
 data:
+  - data/ui_modules.yml
   - data/settings.yml
   - data/groups.yml
   - data/acl_rules.yml

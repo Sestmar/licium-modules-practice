@@ -1,26 +1,8 @@
-# ================== ACCIONES ==================
-- model: ui.action
-  ext_id: action_community_events_event
-  fields:
-    name: Eventos
-    model_key: community_events.event
-
-- model: ui.action
-  ext_id: action_community_events_session
-  fields:
-    name: Sesiones
-    model_key: community_events.session
-
-- model: ui.action
-  ext_id: action_community_events_registration
-  fields:
-    name: Inscripciones
-    model_key: community_events.registration
-
 # ================== VISTAS EVENTO ==================
 - model: ui.view
   ext_id: events_view_event_list
   fields:
+    name: "Eventos - Lista"
     model_key: community_events.event
     type_id.ext_id: ui.ui_view_type_list
     definition:
@@ -33,6 +15,7 @@
 - model: ui.view
   ext_id: events_view_event_form
   fields:
+    name: "Eventos - Formulario"
     model_key: community_events.event
     type_id.ext_id: ui.ui_view_type_form
     definition:
@@ -43,7 +26,6 @@
           fields: [start_at, end_at, capacity_total, location]
         - label: Información Adicional
           fields: [summary, description, organizer_user_id]
-      
       header_actions:
         - key: action_publish_event
           type: service
@@ -58,10 +40,39 @@
           method: close_registration
           model_key: community_events.event
 
+
+# ================== VISTAS SESIÓN ==================
+- model: ui.view
+  ext_id: events_view_session_list
+  fields:
+    name: "Sesiones - Lista"
+    model_key: community_events.session
+    type_id.ext_id: ui.ui_view_type_list
+    definition:
+      columns:
+        - { field: event_id, label: Evento }
+        - { field: title, label: Título }
+        - { field: start_at, label: Inicio }
+
+- model: ui.view
+  ext_id: events_view_session_form
+  fields:
+    name: "Sesiones - Formulario"
+    model_key: community_events.session
+    type_id.ext_id: ui.ui_view_type_form
+    definition:
+      groups:
+        - label: General
+          fields: [event_id, title, status]
+        - label: Horario y Sala
+          fields: [start_at, end_at, speaker_name, room, capacity]
+
+
 # ================== VISTAS INSCRIPCIÓN ==================
 - model: ui.view
   ext_id: events_view_registration_list
   fields:
+    name: "Inscripciones - Lista"
     model_key: community_events.registration
     type_id.ext_id: ui.ui_view_type_list
     definition:
@@ -70,7 +81,6 @@
         - { field: attendee_email, label: Email }
         - { field: status, label: Estado, chip: true }
         - { field: checkin_at, label: Entrada }
-      
       row_actions:
         - key: action_confirm_reg
           type: service
@@ -84,3 +94,74 @@
           icon: mdi-map-marker-check
           method: checkin
           model_key: community_events.registration
+
+- model: ui.view
+  ext_id: events_view_registration_form
+  fields:
+    name: "Inscripciones - Formulario"
+    model_key: community_events.registration
+    type_id.ext_id: ui.ui_view_type_form
+    definition:
+      groups:
+        - label: Datos Asistente
+          fields: [event_id, session_id, attendee_name, attendee_email]
+        - label: Estado
+          fields: [status, registered_at, checkin_at]
+
+# ================== ACCIONES (Con Rutas y Permisos) ==================
+- model: ui.action
+  ext_id: action_community_events_event
+  fields:
+    name: "Eventos"
+    route: community-events/events
+    model_key: community_events.event
+    model_path: "community_events/event"
+    menu: true
+    context:
+      allowed_group_ext_ids:
+        - community_events_group_viewer
+        - community_events_group_staff
+        - core_group_superadmin
+    default_multi_read_view_id.ext_id: events_view_event_list
+    default_single_edit_view_id.ext_id: events_view_event_form
+    views.ext_id:
+      - events_view_event_list
+      - events_view_event_form
+
+- model: ui.action
+  ext_id: action_community_events_session
+  fields:
+    name: "Sesiones"
+    route: community-events/sessions
+    model_key: community_events.session
+    model_path: "community_events/session"
+    menu: true
+    context:
+      allowed_group_ext_ids:
+        - community_events_group_viewer
+        - community_events_group_staff
+        - core_group_superadmin
+    default_multi_read_view_id.ext_id: events_view_session_list
+    default_single_edit_view_id.ext_id: events_view_session_form
+    views.ext_id:
+      - events_view_session_list
+      - events_view_session_form
+
+- model: ui.action
+  ext_id: action_community_events_registration
+  fields:
+    name: "Inscripciones"
+    route: community-events/registrations
+    model_key: community_events.registration
+    model_path: "community_events/registration"
+    menu: true
+    context:
+      allowed_group_ext_ids:
+        - community_events_group_viewer
+        - community_events_group_staff
+        - core_group_superadmin
+    default_multi_read_view_id.ext_id: events_view_registration_list
+    default_single_edit_view_id.ext_id: events_view_registration_form
+    views.ext_id:
+      - events_view_registration_list
+      - events_view_registration_form

@@ -1,17 +1,37 @@
-- model: core.acl
-  ext_id: acl_events_staff_event
+# 1. Regla para el Staff: Poder absoluto en todo el módulo (CRUD total)
+- model: core.aclrule
+  ext_id: acl_events_staff_all
   fields:
-    model_name: community_events.event
     group_id.ext_id: community_events_group_staff
+    model_key: "community_events.*"
     perm_read: true
     perm_create: true
-    perm_update: true
+    perm_write: true
     perm_delete: true
 
-- model: core.acl
-  ext_id: acl_events_viewer_event
+# 2. Reglas para el Público: Leer eventos publicados
+- model: core.aclrule
+  ext_id: acl_events_viewer_read_event
   fields:
-    model_name: community_events.event
     group_id.ext_id: community_events_group_viewer
+    model_key: "community_events.event"
     perm_read: true
-    domain: "[('status', '=', 'published'), ('is_public', '=', True)]"
+    domain:
+      - { field: "status", operator: "=", value: "published" }
+      - { field: "is_public", operator: "=", value: true }
+
+# 3. Reglas para el Público: Leer sesiones
+- model: core.aclrule
+  ext_id: acl_events_viewer_read_session
+  fields:
+    group_id.ext_id: community_events_group_viewer
+    model_key: "community_events.session"
+    perm_read: true
+
+# 4. Reglas para el Público: Poder CREAR inscripciones
+- model: core.aclrule
+  ext_id: acl_events_viewer_create_registration
+  fields:
+    group_id.ext_id: community_events_group_viewer
+    model_key: "community_events.registration"
+    perm_create: true
