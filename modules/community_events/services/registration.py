@@ -1,88 +1,96 @@
-from app.core.base import BaseService, exposed_action
-from datetime import datetime, timezone
+import datetime as dt
+from fastapi import HTTPException
+from app.core.base import BaseService
+from app.core.services import exposed_action
+from app.core.serializer import serialize
+from sqlalchemy import select
 
 class RegistrationService(BaseService):
-    __model__ = "community_events.registration"
+    from ..models.registration import Registration
+    from ..models.event import Event
 
-    @exposed_action({
-        "label": {"es": "Inscribir", "en": "Register"}, 
-        "icon": "mdi-account-plus"
-    })
-    def register(self, event_id: str, attendee_name: str, attendee_email: str, session_id: str | None = None) -> str:
-        """Crea una inscripción calculando automáticamente si hay aforo."""
-        # 1. Obtenemos el evento usando el entorno de Licium (self.env)
-        event_service = self.env.get_service("modules.community_events.services.event.EventService")
-        event = event_service.read(event_id)
+    def create(self, data: dict) -> dict:
+        """Sobrescribe la creación base para calcular automáticamente si hay aforo."""
+        event_id = data.get("event_id")
+        event = self.repo.session.get(self.Event, int(event_id))
+        
+        # Traemos el evento de la base de datos
+        # ESTO NOS DIRÁ LA VERDAD EN LOS LOGS 👇
+        print(f"DEBUG: Evento ID {event_id} tiene estado: '{event.status if event else 'NO ENCONTRADO'}'")
+        
+        if not event or event.status != "published":
+            raise HTTPException(status_code=400, detail=f"Error: El evento {event_id} tiene estado '{event.status if event else 'N/A'}'")
         
         if event.status != "published":
-            raise ValueError("No se admiten inscripciones. El evento no está publicado.")
-            
-        # 2. Contamos cuántos confirmados hay ya en este evento
-        domain = [("event_id", "=", event_id), ("status", "=", "confirmed")]
-        confirmed_count = self.search_count(domain)
-        
-        # 3. Lógica de aforo (¡Aquí está la magia!)
-        status = "confirmed"
-        if confirmed_count >= event.capacity_total:
-            status = "waitlist" # Si está lleno, a la lista de espera
-            
-        # 4. Creamos el registro
-        data = {
-            "event_id": event_id,
-            "attendee_name": attendee_name,
-            "attendee_email": attendee_email,
-            "session_id": session_id,
-            "status": status
-        }
-        return self.create(data)
+            raise HTTPException(status_code=400, detail="No se admiten inscripciones. El evento no está publicado.")
 
-    @exposed_action({
-        "label": {"es": "Confirmar Manual", "en": "Confirm"}, 
-        "icon": "mdi-check-circle", 
-        "color": "success"
-    })
-    def confirm(self, id: str, note: str | None = None) -> None:
-        reg = self.read(id)
+        # 2. Contamos cuántos confirmados hay en este evento usando SQLAlchemy
+        stmt = select(self.Registration).where(
+            self.Registration.event_id == int(event_id),
+            self.Registration.status == "confirmed"
+        )
+        confirmed_count = len(self.repo.session.scalars(stmt).all())
+
+        # 3. Lógica de aforo
+        if confirmed_count >= (event.capacity_total or 0):
+            data["status"] = "waitlist"
+        else:
+            data["status"] = "confirmed"
+
+        # Dejamos que Licium cree el registro con el estado que hemos calculado
+        return super().create(data)
+
+    @exposed_action("write", groups=["community_events_group_staff", "core_group_superadmin"])
+    def confirm(self, id: int, note: str | None = None) -> dict:
+        reg = self.repo.session.get(self.Registration, int(id))
+        if not reg: raise HTTPException(400, "Inscripción no encontrada")
+        
         if reg.status == "cancelled":
             raise ValueError("No se puede confirmar una inscripción cancelada.")
-        self.update(id, {"status": "confirmed", "notes": note})
+        
+        reg.status = "confirmed"
+        self.repo.session.add(reg)
+        self.repo.session.commit()
+        self.repo.session.refresh(reg)
+        return serialize(reg)
 
-    @exposed_action({
-        "label": {"es": "A Lista Espera", "en": "Move Waitlist"}, 
-        "icon": "mdi-clock-outline",
-        "color": "warning"
-    })
-    def move_waitlist(self, id: str, note: str | None = None) -> None:
-        self.update(id, {"status": "waitlist", "notes": note})
+    @exposed_action("write", groups=["community_events_group_staff", "core_group_superadmin"])
+    def move_waitlist(self, id: int, note: str | None = None) -> dict:
+        reg = self.repo.session.get(self.Registration, int(id))
+        if not reg: raise HTTPException(400, "Inscripción no encontrada")
+        
+        reg.status = "waitlist"
+        self.repo.session.add(reg)
+        self.repo.session.commit()
+        self.repo.session.refresh(reg)
+        return serialize(reg)
 
-    @exposed_action({
-        "label": {"es": "Check-in Individual", "en": "Check-in"}, 
-        "icon": "mdi-map-marker-check", 
-        "color": "info"
-    })
-    def checkin(self, id: str, source: str = "manual") -> None:
-        reg = self.read(id)
+    @exposed_action("write", groups=["community_events_group_staff", "core_group_superadmin"])
+    def checkin(self, id: int) -> dict:
+        reg = self.repo.session.get(self.Registration, int(id))
+        if not reg: raise HTTPException(400, "Inscripción no encontrada")
+        
         if reg.status != "confirmed":
             raise ValueError("Solo los asistentes confirmados pueden hacer check-in.")
         if reg.checkin_at:
             raise ValueError("Este asistente ya ha entrado al evento.")
         
-        self.update(id, {"checkin_at": datetime.now(timezone.utc)})
+        reg.checkin_at = dt.datetime.now(dt.timezone.utc)
+        self.repo.session.add(reg)
+        self.repo.session.commit()
+        self.repo.session.refresh(reg)
+        return serialize(reg)
 
-    # Importante --> bulk=True permite seleccionar varios en la tabla de golpe
-    @exposed_action({
-        "label": {"es": "Check-in Masivo", "en": "Bulk Check-in"}, 
-        "icon": "mdi-account-group", 
-        "bulk": True,
-        "color": "primary"
-    })
-    def bulk_checkin(self, ids: list[str]) -> dict:
-        """Acción para la vista de lista: Check-in a varios a la vez."""
+    @exposed_action("write", groups=["community_events_group_staff", "core_group_superadmin"])
+    def bulk_checkin(self, ids: list[int]) -> dict:
+        """Acción masiva para la vista de lista: Check-in a varios a la vez."""
         count = 0
         for reg_id in ids:
-            reg = self.read(reg_id)
-            if reg.status == "confirmed" and not reg.checkin_at:
-                self.update(reg_id, {"checkin_at": datetime.now(timezone.utc)})
+            reg = self.repo.session.get(self.Registration, int(reg_id))
+            if reg and reg.status == "confirmed" and not reg.checkin_at:
+                reg.checkin_at = dt.datetime.now(dt.timezone.utc)
+                self.repo.session.add(reg)
                 count += 1
                 
+        self.repo.session.commit()
         return {"message": {"es": f"Check-in completado para {count} asistentes.", "en": f"Check-in done for {count} attendees."}}

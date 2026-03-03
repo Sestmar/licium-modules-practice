@@ -8,7 +8,7 @@ from app.core.fields import field
 class Registration(Base):
     __tablename__ = "community_event_registration"
     __abstract__ = False
-    __model__ = "community_events.registration"
+    __model__ = "registration"
     __service__ = "modules.community_events.services.registration.RegistrationService"
 
     event_id = field(

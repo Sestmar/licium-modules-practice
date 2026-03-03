@@ -1,56 +1,71 @@
-from app.core.base import BaseService, exposed_action
+from fastapi import HTTPException
+from app.core.base import BaseService
+from app.core.services import exposed_action
+from app.core.serializer import serialize
 
 class EventService(BaseService):
-    __model__ = "community_events.event"
+    from ..models.event import Event
 
-    @exposed_action({
-        "label": {"es": "Publicar Evento", "en": "Publish Event"}, 
-        "icon": "mdi-earth"
-    })
-    def publish_event(self, id: str, note: str | None = None) -> None:
+    @exposed_action("write", groups=["community_events_group_staff", "core_group_superadmin"])
+    def publish_event(self, id: int, note: str | None = None) -> dict:
         """Cambia el evento de borrador a publicado."""
-        event = self.read(id)
+        event = self.repo.session.get(self.Event, int(id))
+        if not event:
+            raise HTTPException(400, "Evento no encontrado")
+        
         if event.status != "draft":
             raise ValueError("Solo se pueden publicar eventos que estén en estado borrador.")
         
-        self.update(id, {"status": "published"})
-        # Si tuviéramos un sistema de logs, aquí guardaríamos la 'note'
+        event.status = "published"
+        self.repo.session.add(event)
+        self.repo.session.commit()
+        self.repo.session.refresh(event)
+        return serialize(event)
 
-    @exposed_action({
-        "label": {"es": "Cerrar Inscripciones", "en": "Close Registration"}, 
-        "icon": "mdi-door-closed",
-        "color": "warning"
-    })
-    def close_registration(self, id: str, reason: str | None = None) -> None:
+    @exposed_action("write", groups=["community_events_group_staff", "core_group_superadmin"])
+    def close_registration(self, id: int, reason: str | None = None) -> dict:
         """Cierra el evento para que no entren más inscripciones."""
-        event = self.read(id)
+        event = self.repo.session.get(self.Event, int(id))
+        if not event:
+            raise HTTPException(400, "Evento no encontrado")
+        
         if event.status != "published":
             raise ValueError("Solo se pueden cerrar eventos que actualmente estén publicados.")
         
-        self.update(id, {"status": "closed"})
+        event.status = "closed"
+        self.repo.session.add(event)
+        self.repo.session.commit()
+        self.repo.session.refresh(event)
+        return serialize(event)
 
-    @exposed_action({
-        "label": {"es": "Cancelar Evento", "en": "Cancel Event"}, 
-        "icon": "mdi-cancel", 
-        "color": "error"
-    })
-    # Fíjate que 'reason' NO tiene '= None'. Licium hará que este campo sea obligatorio en el modal.
-    def cancel_event(self, id: str, reason: str) -> None:
+    @exposed_action("write", groups=["community_events_group_staff", "core_group_superadmin"])
+    def cancel_event(self, id: int, reason: str | None = None) -> dict:
         """Cancela el evento por fuerza mayor."""
-        event = self.read(id)
+        event = self.repo.session.get(self.Event, int(id))
+        if not event:
+            raise HTTPException(400, "Evento no encontrado")
+        
         if event.status == "cancelled":
             raise ValueError("El evento ya está cancelado.")
         
-        self.update(id, {"status": "cancelled"})
+        event.status = "cancelled"
+        self.repo.session.add(event)
+        self.repo.session.commit()
+        self.repo.session.refresh(event)
+        return serialize(event)
 
-    @exposed_action({
-        "label": {"es": "Reabrir Evento", "en": "Reopen Event"}, 
-        "icon": "mdi-refresh"
-    })
-    def reopen_event(self, id: str) -> None:
+    @exposed_action("write", groups=["community_events_group_staff", "core_group_superadmin"])
+    def reopen_event(self, id: int) -> dict:
         """Vuelve a abrir un evento cerrado o cancelado."""
-        event = self.read(id)
+        event = self.repo.session.get(self.Event, int(id))
+        if not event:
+            raise HTTPException(404, "Evento no encontrado")
+        
         if event.status not in ["closed", "cancelled"]:
             raise ValueError("Solo se pueden reabrir eventos que estén cerrados o cancelados.")
         
-        self.update(id, {"status": "published"})
+        event.status = "published"
+        self.repo.session.add(event)
+        self.repo.session.commit()
+        self.repo.session.refresh(event)
+        return serialize(event)

@@ -7,8 +7,18 @@ from app.core.fields import field
 class Event(Base):
     __tablename__ = "community_event"
     __abstract__ = False
-    __model__ = "community_events.event"
+    __model__ = "event"  # <-- Solo 'event', Licium añade el resto.
     __service__ = "modules.community_events.services.event.EventService"
+
+    __selector_config__ = {
+        "label_field": "title",
+        "search_fields": ["title", "slug"],
+        "columns": [
+            {"field": "id", "label": "ID"},
+            {"field": "title", "label": "Título"},
+            {"field": "status", "label": "Estado"},
+        ],
+    }
 
     title = field(
         String(150),
@@ -36,18 +46,20 @@ class Event(Base):
         info={"label": {"es": "Descripción", "en": "Description"}}
     )
     status = field(
-        String(50),
+        String(20),
         default="draft",
+        required=True,
         public=True,
+        editable=True,
         info={
             "label": {"es": "Estado", "en": "Status"},
             "choices": [
                 {"value": "draft", "label": {"es": "Borrador", "en": "Draft"}},
                 {"value": "published", "label": {"es": "Publicado", "en": "Published"}},
                 {"value": "closed", "label": {"es": "Cerrado", "en": "Closed"}},
-                {"value": "cancelled", "label": {"es": "Cancelado", "en": "Cancelled"}}
-            ]
-        }
+                {"value": "cancelled", "label": {"es": "Cancelado", "en": "Cancelled"}},
+            ],
+        },
     )
     start_at = field(
         DateTime(timezone=True),
@@ -81,7 +93,7 @@ class Event(Base):
         info={"label": {"es": "Es Público", "en": "Is Public"}}
     )
     
-    # ¡Nuestra famosa FK a core_user con Uuid!
+    # FK a core_user con Uuid
     organizer_user_id = field(
         Uuid,
         ForeignKey("core_user.id", ondelete="SET NULL"),

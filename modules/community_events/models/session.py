@@ -7,7 +7,7 @@ from app.core.fields import field
 class EventSession(Base):
     __tablename__ = "community_event_session"
     __abstract__ = False
-    __model__ = "community_events.session"
+    __model__ = "session"
     __service__ = "modules.community_events.services.session.SessionService"
 
     event_id = field(

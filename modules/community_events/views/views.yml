@@ -40,7 +40,6 @@
           method: close_registration
           model_key: community_events.event
 
-
 # ================== VISTAS SESIÓN ==================
 - model: ui.view
   ext_id: events_view_session_list
@@ -66,7 +65,6 @@
           fields: [event_id, title, status]
         - label: Horario y Sala
           fields: [start_at, end_at, speaker_name, room, capacity]
-
 
 # ================== VISTAS INSCRIPCIÓN ==================
 - model: ui.view
@@ -108,7 +106,7 @@
         - label: Estado
           fields: [status, registered_at, checkin_at]
 
-# ================== ACCIONES (Con Rutas y Permisos) ==================
+# ================== ACCIONES (Rutas Corregidas) ==================
 - model: ui.action
   ext_id: action_community_events_event
   fields:
