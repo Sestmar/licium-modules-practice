@@ -15,9 +15,6 @@ class RegistrationService(BaseService):
         event = self.repo.session.get(self.Event, int(event_id))
         
         # Traemos el evento de la base de datos
-        # ESTO NOS DIRÁ LA VERDAD EN LOS LOGS 👇
-        print(f"DEBUG: Evento ID {event_id} tiene estado: '{event.status if event else 'NO ENCONTRADO'}'")
-        
         if not event or event.status != "published":
             raise HTTPException(status_code=400, detail=f"Error: El evento {event_id} tiene estado '{event.status if event else 'N/A'}'")
         
