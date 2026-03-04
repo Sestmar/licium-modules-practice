@@ -37,7 +37,7 @@ class Registration(Base):
         public=True,
         info={"label": {"es": "Email", "en": "Email"}}
     )
-    # ¡Otra vez el UUID para el usuario registrado!
+    # el UUID para el usuario registrado
     attendee_user_id = field(
         Uuid,
         ForeignKey("core_user.id", ondelete="SET NULL"),
